@@ -77,7 +77,19 @@
           })
         });
 
-        const data = await response.json();
+        let data;
+        try {
+          data = await response.json();
+          if (!data.choices || !data.choices[0]?.message?.content) {
+            throw new Error("Empty or malformed response");
+          }
+        } catch (err) {
+          console.error("API Error:", err);
+          console.error("Raw Response:", await response.text());
+          addMessage("Bot", "(Error from model or invalid API key)", "bot");
+          return;
+        }
+        
         const reply = data.choices?.[0]?.message?.content || "(No response)";
         addMessage("Bot", reply, "bot");
       }
